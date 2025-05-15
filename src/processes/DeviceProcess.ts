@@ -35,9 +35,9 @@ export abstract class DeviceProcess implements DeviceProcessInterface {
   protected baseArgs(): string[] {
     return [
       `${__dirname}/../../bin/cucumber`,
-      '-f', 'pretty',
-      '-f', `json:${Constants.REPORT_PATH}/${this.testScenario.executionId}/${this.device.id}/${Constants.FILE_REPORT_NAME}`,
-      `${this.testScenario.featureFile.filePath}`, 
+       '-f', 'pretty',
+       '-f', `json:${Constants.REPORT_PATH}/${this.testScenario.executionId}/${this.device.id}/${Constants.FILE_REPORT_NAME}`,
+       `${this.testScenario.featureFile.filePath}`, 
       '--tags', `@user${this.id}`,
       '--world-parameters', this.worldParams(),
       '--require', FileHelper.instance().pathToAbsolutePath(`${__dirname}/../steps/both.js`)
@@ -119,7 +119,7 @@ export abstract class DeviceProcess implements DeviceProcessInterface {
       let entryParts: string[] = entry.split(Constants.SEPARATOR);
       return Number(entryParts[0]);
     }).filter((id: Number) => {
-      return id != undefined && id != null && id != NaN;
+      return id != undefined && id != null && !Number.isNaN(id);
     });
   }
 
@@ -133,7 +133,7 @@ export abstract class DeviceProcess implements DeviceProcessInterface {
     return stateContent.trim().split('\n').map((entry: string) => {
       return Number(entry);
     }).filter((id: Number) => {
-      return id != undefined && id != null && id != NaN;
+      return id != undefined && id != null && !Number.isNaN(id);
     });
   }
 

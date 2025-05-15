@@ -5,6 +5,7 @@ import path from "path";
 import * as Constants from '../utils/Constants';
 
 export class FileHelper {
+  
   private static singletonInstance: FileHelper;
 
   private constructor() { }
@@ -30,6 +31,13 @@ export class FileHelper {
         this.deleteFileInPath(filePath);
       });
     });
+  }
+
+  deleteKrakenDirectory(krakenDir: string) {
+
+    if (this.pathExists(krakenDir)) {
+      fse.removeSync(krakenDir);
+    }
   }
 
   deleteFileInPath(path: string) {
@@ -64,14 +72,16 @@ export class FileHelper {
   }
 
   createFolderIfDoesNotExist(path: string) {
+
     if (!fs.existsSync(path)) {
       fs.mkdirSync(path, { recursive: true });
     }
   }
 
-  createFileIfDoesNotExist(path: string) {
-    if (!fs.existsSync(path)) {
-      fs.openSync(path, 'w');
+  createFileIfDoesNotExist(pathd: string) {
+    this.createFolderIfDoesNotExist(path.dirname(pathd));
+    if (!fs.existsSync(pathd)) {
+      fs.openSync(pathd, 'w');
     }
   }
 
@@ -97,7 +107,7 @@ export class FileHelper {
   }
 
   createKrakenSupportFileIfDoesNotExist(path: string) {
+
     this.createFolderIfDoesNotExist(Constants.KRAKEN_DIRECTORY);
-    this.createFileIfDoesNotExist(path);
   }
 }

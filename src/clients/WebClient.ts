@@ -13,7 +13,6 @@ export class WebClient extends Client {
     }
 
     async start(): Promise<any> {
-        this.createInbox();
         this.browser =  await remote({
             capabilities: this.capabilities()
         }, (client: any) => {
@@ -33,7 +32,6 @@ export class WebClient extends Client {
     }
 
     async stop(): Promise<any> {
-        this.deleteInbox();
         await this.browser.deleteSession();
     }
 }

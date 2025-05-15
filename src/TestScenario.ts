@@ -31,6 +31,7 @@ export class TestScenario {
   }
 
   public async run() {
+
     if (!this.featureFile.hasRightSyntax()) {
       throw new Error(
         `ERROR: Verify feature file ${this.featureFile.filePath} has one unique @user tag for each scenario`
@@ -44,15 +45,14 @@ export class TestScenario {
   }
 
   private beforeExecute() {
-    this.deleteAllInboxes();
     this.deleteSupportFilesAndDirectories();
 
     this.devices = this.sampleDevices();
     var interval = 1000;
-    this.devices.forEach((device: AndroidDevice, index: number) => {
+    this.devices.forEach((device: WebDevice, index: number) => {
       if (!device) { return; }
 
-      let process = this.processForUserIdInDevice(index + 1, device);
+      let process = new WebProcess(index + 1, device, this); 
       process.registerProcessToDirectory();
       this.processes.push(process);
     });
@@ -62,7 +62,7 @@ export class TestScenario {
   private execute() {
     this.processes.forEach((process) => {
       process.run();
-      this.pause(5000)
+      this.pause(2000)
     });
   }
 
@@ -77,54 +77,27 @@ export class TestScenario {
   }
 
   private deleteSupportFilesAndDirectories() {
+
     FileHelper.instance().deleteFileInPathIfExists(Constants.DIRECTORY_PATH);
     FileHelper.instance().deleteFileInPathIfExists(Constants.DICTIONARY_PATH);
     for (let state in Constants.PROCESS_STATE_FILE_PATH) {
       FileHelper.instance().deleteFileInPathIfExists(Constants.PROCESS_STATE_FILE_PATH[`${state}`]);
     }
-  }
 
-  private deleteAllInboxes() {
-    FileHelper.instance().deleteFilesWithGlobPattern(`${process.cwd()}/${Constants.KRAKEN_DIRECTORY}/.*_${Constants.INBOX_FILE_NAME}`);
-  }
-
-  processForUserIdInDevice(userId: number, device: Device) {
-    let process: any = null;
-    if(device instanceof AndroidDevice) {
-      process = new AndroidProcess(userId, device, this);
-    } else if(device instanceof WebDevice) {
-      process = new WebProcess(userId, device, this);
-    } else {
-      throw new Error('ERROR: Platform not supported');
-    }
-    return process;
+    FileHelper.instance().deleteKrakenDirectory(Constants.KRAKEN_DIRECTORY);
   }
 
   sampleDevices(): Device[] {
-    let sample: any[] = [];
-    let mobileDevices: AndroidDevice[] = this.sampleMobileDevices();
-    let webDevices: WebDevice[] = this.sampleWebDevices();
-    this.featureFile.requiredDevicesInfo().forEach((deviceInfo) => {
-      let userId: number = Number(deviceInfo.userId); 
-      let device = deviceInfo.systemType === '@web' ? webDevices.shift() : mobileDevices.shift();
-      sample[userId - 1] = device;
-    });
-    return sample;
-  }
+    
+    // Crea un WebDevice por cada escenario en el feature file
+    const numberOfScenarios = this.featureFile.scenarios.length;
 
-  sampleMobileDevices(): AndroidDevice[] {
-    let mobileDevices: AndroidDevice[] = ADB.instance().connectedDevices();
-    let numberOfRequiredMobileDevices =  this.featureFile.numberOfRequiredMobileDevices();
-    return mobileDevices.slice(0, numberOfRequiredMobileDevices);
-  }
 
-  sampleWebDevices(): WebDevice[] {
-    let numberOfRequiredWebDevices =  this.featureFile.numberOfRequiredWebDevices();
     let webDevices: WebDevice[] = [];
-    for(var i = 0; i < numberOfRequiredWebDevices; i++) {
-      webDevices.push(WebDevice.factoryCreate())
+    for (let i = 0; i < numberOfScenarios; i++) {
+      webDevices.push(WebDevice.factoryCreate());
     }
-    return webDevices.slice(0, numberOfRequiredWebDevices);
+    return webDevices;
   }
 
   private allRegiresteredDevicesFinished(): Boolean {
