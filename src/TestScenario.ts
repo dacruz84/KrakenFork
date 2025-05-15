@@ -69,7 +69,7 @@ export class TestScenario {
   private afterExecute() {
     this.deleteSupportFilesAndDirectories();
     this.notifyScenarioFinished();
-    this.reporter.saveReport();
+    // this.reporter.saveReport();
   }
 
   private notifyScenarioFinished() {
