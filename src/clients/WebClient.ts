@@ -14,6 +14,7 @@ export class WebClient extends Client {
 
     async start(): Promise<any> {
         this.browser =  await remote({
+            logLevel: 'error',
             capabilities: this.capabilities()
         }, (client: any) => {
             client.readSignal = this.readSignal.bind(this);
